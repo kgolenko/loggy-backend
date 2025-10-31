@@ -26,3 +26,8 @@ export const CONFIG__JWT_REFRESH_TOKEN_EXPIRATION_TIME =
  * Параметры фронтенда
  */
 export const CONFIG__FRONTEND_URL = 'FRONTEND_URL';
+
+/**
+ * Параметры для логов
+ */
+export const CONFIG__LOG_RETENTION_DAYS = 'LOG_RETENTION_DAYS';

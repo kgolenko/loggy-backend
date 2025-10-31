@@ -1,98 +1,400 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Loggy Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Loggy - это система для централизованного сбора, хранения и realtime просмотра логов приложений. Аналог Logtail с акцентом на realtime функционал и простоту интеграции.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Основные возможности
 
-## Description
+- ✅ **Аутентификация** - Email/password с JWT и refresh tokens
+- ✅ **Управление проектами** - Создание проектов с уникальными токенами для авторизации
+- ✅ **Прием и хранение логов** - REST API для отправки логов из приложений
+- ✅ **Realtime просмотр логов** - WebSocket (Socket.IO) для realtime потока логов с фильтрацией
+- ✅ **Исторический просмотр** - REST API для получения истории логов с фильтрацией
+- ✅ **Автоматическая очистка** - CRON задача для удаления старых логов (30 дней)
+- ✅ **Фильтрация** - По уровню, датам, тегам и метаданным
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 📋 Технологический стек
 
-## Project setup
+- **Framework:** NestJS
+- **Database:** PostgreSQL + Prisma ORM
+- **Realtime:** Socket.IO
+- **Authentication:** JWT (access + refresh tokens)
+- **Scheduling:** @nestjs/schedule для CRON задач
 
-```bash
-$ npm install
+## 🏗️ Архитектура
+
+Проект использует модульную архитектуру NestJS:
+
+```
+src/
+├── common/          # Общие модули (Auth, Database)
+├── domain/          # Бизнес-логика
+│   ├── projects/    # Управление проектами
+│   ├── logs/        # Логи: прием, хранение, CRON очистка
+│   └── realtime/    # WebSocket для realtime логов
+├── shared/          # Утилиты, константы, interceptors
+└── providers/       # Провайдеры модулей
 ```
 
-## Compile and run the project
+**Подробная архитектура:** [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+
+## 🚦 Быстрый старт
+
+### 1. Установка зависимостей
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+### 2. Настройка окружения
+
+Создайте файл `.env` в корне проекта:
+
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/loggy?schema=public"
+
+# JWT
+JWT_ACCESS_TOKEN_SECRET="your-secret-key"
+JWT_ACCESS_TOKEN_EXPIRES_IN="15m"
+JWT_REFRESH_TOKEN_SECRET="your-refresh-secret-key"
+JWT_REFRESH_TOKEN_EXPIRES_IN="7d"
+
+# Logs
+LOG_RETENTION_DAYS=30
+```
+
+### 3. База данных
 
 ```bash
-# unit tests
-$ npm run test
+# Применить миграции Prisma
+npx prisma migrate dev
 
-# e2e tests
-$ npm run test:e2e
+# Применить дополнительные индексы и расширения PostgreSQL
+psql $DATABASE_URL -f prisma/post-migration.sql
 
-# test coverage
-$ npm run test:cov
+# Сгенерировать Prisma Client
+npx prisma generate
 ```
 
-## Deployment
+**Подробнее:** [prisma/README.md](./prisma/README.md)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 4. Запуск приложения
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+# Development
+npm run start:dev
+
+# Production
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Приложение будет доступно по адресу `http://localhost:3000`
 
-## Resources
+## 📚 API Документация
 
-Check out a few resources that may come in handy when working with NestJS:
+### Аутентификация
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+#### Регистрация
+```http
+POST /api/v1/auth/register
+Content-Type: application/json
 
-## Support
+{
+  "email": "user@example.com",
+  "password": "secure-password"
+}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### Вход
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
 
-## Stay in touch
+{
+  "email": "user@example.com",
+  "password": "secure-password"
+}
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+**Ответ:**
+```json
+{
+  "accessToken": "jwt-access-token",
+  "refreshToken": "jwt-refresh-token",
+  "user": {
+    "id": "user-uuid",
+    "email": "user@example.com"
+  }
+}
+```
 
-## License
+#### Обновление токена
+```http
+POST /api/v1/auth/refresh
+Content-Type: application/json
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+{
+  "refreshToken": "jwt-refresh-token"
+}
+```
+
+#### Выход
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer <access-token>
+```
+
+### Проекты
+
+Все endpoints требуют JWT авторизации (header: `Authorization: Bearer <token>`)
+
+#### Создать проект
+```http
+POST /api/v1/projects
+Authorization: Bearer <token>
+
+{
+  "name": "My Project",
+  "description": "Project description"
+}
+```
+
+**Ответ:**
+```json
+{
+  "id": "project-uuid",
+  "name": "My Project",
+  "description": "Project description",
+  "token": "project-token-uuid",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### Получить все проекты
+```http
+GET /api/v1/projects
+Authorization: Bearer <token>
+```
+
+#### Получить проект по ID
+```http
+GET /api/v1/projects/:projectId
+Authorization: Bearer <token>
+```
+
+#### Обновить проект
+```http
+PATCH /api/v1/projects/:projectId
+Authorization: Bearer <token>
+
+{
+  "name": "Updated Name",
+  "description": "Updated description"
+}
+```
+
+#### Удалить проект
+```http
+DELETE /api/v1/projects/:projectId
+Authorization: Bearer <token>
+```
+
+#### Регенерировать токен проекта
+```http
+POST /api/v1/projects/:projectId/regenerate-token
+Authorization: Bearer <token>
+```
+
+### Логи
+
+#### Отправить лог (публичный endpoint)
+```http
+POST /api/v1/logs
+X-Project-Token: <project-token>
+Content-Type: application/json
+
+{
+  "level": "error",
+  "message": "Payment failed",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "tags": ["payment", "critical"],
+  "metadata": {
+    "service": "payment-service",
+    "hostname": "server-01",
+    "request": {
+      "id": "req-123",
+      "method": "POST",
+      "path": "/api/payment"
+    }
+  }
+}
+```
+
+**Уровни логов:** `error`, `warn`, `info`, `debug`, `verbose`
+
+#### Получить логи проекта (требует авторизации)
+```http
+GET /api/v1/projects/:projectId/logs?level=error&level=warn&tags=payment&from=2024-01-01&to=2024-01-31&limit=100&offset=0
+Authorization: Bearer <token>
+```
+
+**Query параметры:**
+- `level` - фильтр по уровням (можно несколько)
+- `tags` - фильтр по тегам (можно несколько)
+- `from` - начальная дата (ISO 8601)
+- `to` - конечная дата (ISO 8601)
+- `limit` - количество записей (по умолчанию 100)
+- `offset` - смещение для пагинации
+
+#### Получить количество логов
+```http
+GET /api/v1/projects/:projectId/logs/count?level=error&tags=payment&from=2024-01-01&to=2024-01-31
+Authorization: Bearer <token>
+```
+
+#### Получить конкретный лог
+```http
+GET /api/v1/projects/:projectId/logs/:logId
+Authorization: Bearer <token>
+```
+
+### Realtime (WebSocket)
+
+Подключение к WebSocket требует JWT токен:
+
+```javascript
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000/realtime', {
+  query: {
+    token: 'your-jwt-access-token'
+  },
+  // или через header:
+  // extraHeaders: {
+  //   Authorization: 'Bearer your-jwt-access-token'
+  // }
+});
+
+// Подписаться на логи проекта с фильтрами
+socket.emit('subscribe', {
+  projectId: 'project-uuid',
+  filters: {
+    level: ['error', 'warn'],
+    tags: ['payment'],
+    metadata: {
+      service: 'payment-service'
+    }
+  }
+});
+
+// Отписаться от проекта
+socket.emit('unsubscribe', {
+  projectId: 'project-uuid'
+});
+
+// Получать новые логи
+socket.on('log:new', (log) => {
+  console.log('New log:', log);
+});
+
+// Подтверждение подписки
+socket.on('subscribed', (data) => {
+  console.log('Subscribed to:', data);
+});
+
+// Ошибки
+socket.on('error', (error) => {
+  console.error('Error:', error);
+});
+```
+
+**Подробнее:** [docs/SOCKETIO_SETUP.md](./docs/SOCKETIO_SETUP.md)
+
+## 🔧 Конфигурация
+
+Основные переменные окружения:
+
+| Переменная | Описание | По умолчанию |
+|-----------|----------|--------------|
+| `DATABASE_URL` | PostgreSQL connection string | - |
+| `JWT_ACCESS_TOKEN_SECRET` | Секрет для access токенов | - |
+| `JWT_ACCESS_TOKEN_EXPIRES_IN` | Время жизни access токена | `15m` |
+| `JWT_REFRESH_TOKEN_SECRET` | Секрет для refresh токенов | - |
+| `JWT_REFRESH_TOKEN_EXPIRES_IN` | Время жизни refresh токена | `7d` |
+| `LOG_RETENTION_DAYS` | Дни хранения логов | `30` |
+
+## 📖 Дополнительная документация
+
+- [Архитектура системы](./docs/ARCHITECTURE.md) - Подробное описание архитектуры и API
+- [Настройка PostgreSQL](./docs/POSTGRESQL_SETUP.md) - Расширения, индексы, оптимизация
+- [Настройка Socket.IO](./docs/SOCKETIO_SETUP.md) - WebSocket интеграция
+- [Настройка Scheduler](./docs/SCHEDULER_SETUP.md) - CRON задачи для очистки логов
+- [Race Conditions](./docs/RACE_CONDITIONS.md) - Анализ race conditions и их решения
+- [Prisma Migrations](./prisma/README.md) - Работа с миграциями базы данных
+
+## 🔄 Интеграция с приложениями
+
+Для отправки логов из ваших приложений можно использовать Winston transport (планируется как отдельный npm пакет) или напрямую отправлять HTTP запросы:
+
+```typescript
+// Пример отправки лога
+const log = {
+  level: 'error',
+  message: 'Payment failed',
+  tags: ['payment', 'critical'],
+  metadata: {
+    service: 'payment-service',
+    request: {
+      id: 'req-123',
+      method: 'POST',
+      path: '/api/payment'
+    }
+  }
+};
+
+await fetch('http://loggy-backend:3000/api/v1/logs', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Project-Token': process.env.LOGGY_PROJECT_TOKEN
+  },
+  body: JSON.stringify(log)
+});
+```
+
+## 🧪 Разработка
+
+```bash
+# Запуск в режиме разработки
+npm run start:dev
+
+# Сборка проекта
+npm run build
+
+# Запуск линтера
+npm run lint
+
+# Исправление ошибок линтера
+npm run lint:fix
+
+# Запуск тестов
+npm run test
+
+# Запуск e2e тестов
+npm run test:e2e
+
+# Покрытие тестами
+npm run test:cov
+```
+
+## 📝 TODO
+
+- [ ] Winston transport npm пакет для легкой интеграции
+- [ ] Rate limiting для защиты от злоупотреблений
+- [ ] Метрики и мониторинг
+- [ ] Партиционирование таблицы logs для масштабирования
+
+## 📄 Лицензия
+
+MIT

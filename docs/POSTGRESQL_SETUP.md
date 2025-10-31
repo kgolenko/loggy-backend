@@ -57,6 +57,8 @@ SET autovacuum_naptime = '10s';
 
 После создания таблицы через Prisma миграции, выполните следующие SQL команды:
 
+**Важно:** Рекомендуется использовать готовый скрипт `prisma/post-migration.sql` вместо ручного выполнения команд.
+
 ```sql
 -- Composite индекс по projectId и timestamp (для большинства запросов)
 CREATE INDEX idx_logs_project_timestamp ON logs(project_id, timestamp DESC);
