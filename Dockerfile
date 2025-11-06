@@ -51,4 +51,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Запускаем приложение
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
