@@ -16,7 +16,7 @@ import { RealtimeFilters } from './interfaces';
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // В продакшене указать конкретный origin
+    origin: '*',
     credentials: true,
   },
   namespace: '/realtime',
@@ -35,9 +35,7 @@ export class RealtimeGateway
   ) {}
 
   afterInit(server: Server) {
-    // Применить JWT middleware
     server.use(SocketJwtMiddleware.create(this.jwtService));
-    // Установить server в RealtimeService для broadcast
     this.realtimeService.setServer(server);
     this.logger.log('Realtime Gateway initialized');
   }
@@ -53,7 +51,6 @@ export class RealtimeGateway
   }
 
   handleDisconnect(client: Socket) {
-    // Отписаться от всех подписок
     this.realtimeService.unsubscribeAll(client.id);
     this.logger.log(`Client disconnected: ${client.id}`);
   }
@@ -73,7 +70,6 @@ export class RealtimeGateway
       return;
     }
 
-    // Подписаться на проект с фильтрами
     const hasAccess = await this.realtimeService.subscribe(
       client.id,
       data.projectId,
@@ -89,7 +85,6 @@ export class RealtimeGateway
       return;
     }
 
-    // Добавить клиента в room проекта
     client.join(`project:${data.projectId}`);
 
     client.emit('subscribed', {

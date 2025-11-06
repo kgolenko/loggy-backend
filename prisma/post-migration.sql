@@ -45,18 +45,3 @@ COMMENT ON COLUMN logs.tags IS 'Массив тегов для категори�
 COMMENT ON INDEX idx_logs_tags_gin IS 'GIN индекс для быстрого поиска по тегам';
 COMMENT ON INDEX idx_logs_metadata_gin IS 'GIN индекс для быстрого поиска по JSONB метаданным';
 COMMENT ON INDEX idx_logs_level_critical IS 'Partial индекс для критичных логов (error, warn)';
-
--- ============================================================
--- 4. Проверка создания индексов
--- ============================================================
-
--- Раскомментировать для проверки:
--- SELECT 
---   schemaname,
---   tablename,
---   indexname,
---   indexdef
--- FROM pg_indexes
--- WHERE tablename = 'logs'
--- ORDER BY indexname;
-

@@ -29,26 +29,21 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
     const { email, password } = registerDto;
 
-    // Проверяем, существует ли пользователь с таким email
     const userExists = await this.userRepository.existsByEmail(email);
     if (userExists) {
       throw new ConflictException('Пользователь с таким email уже существует');
     }
 
-    // Хешируем пароль
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Создаем пользователя
     const user = await this.userRepository.create({
       email,
       password: hashedPassword,
       isActive: true,
     });
 
-    // Генерируем токены
     const tokens = await this.generateTokens(user.id, user.email);
 
-    // Сохраняем refresh token в базу данных
     await this.refreshTokenRepository.create({
       token: tokens.refreshToken,
       userId: user.id,
@@ -69,31 +64,25 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthResponse> {
     const { email, password } = loginDto;
 
-    // Находим пользователя по email
     const user = await this.userRepository.findUnique({ email });
 
     if (!user) {
       throw new UnauthorizedException('Неверный email или пароль');
     }
 
-    // Проверяем активность пользователя
     if (!user.isActive) {
       throw new UnauthorizedException('Аккаунт деактивирован');
     }
 
-    // Проверяем пароль
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Неверный email или пароль');
     }
 
-    // Генерируем токены
     const tokens = await this.generateTokens(user.id, user.email);
 
-    // Отзываем все предыдущие refresh токены пользователя
     await this.refreshTokenRepository.revokeAllUserTokens(user.id);
 
-    // Сохраняем новый refresh token в базу данных
     await this.refreshTokenRepository.create({
       token: tokens.refreshToken,
       userId: user.id,
@@ -113,7 +102,6 @@ export class AuthService {
 
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
     try {
-      // Проверяем токен в базе данных
       const tokenRecord =
         await this.refreshTokenRepository.findByToken(refreshToken);
 
@@ -129,7 +117,6 @@ export class AuthService {
         throw new UnauthorizedException('Refresh token истек');
       }
 
-      // Верифицируем токен
       const refreshSecret = this.configService.getOrThrow<string>(
         CONFIG__JWT_REFRESH_TOKEN_SECRET,
       );
@@ -144,7 +131,6 @@ export class AuthService {
         throw new UnauthorizedException('Неверный тип токена');
       }
 
-      // Находим пользователя
       const user = await this.userRepository.findUnique({ id: payload.sub });
 
       if (!user || !user.isActive) {
@@ -153,13 +139,10 @@ export class AuthService {
         );
       }
 
-      // Отзываем старый refresh token
       await this.refreshTokenRepository.revokeToken(refreshToken);
 
-      // Генерируем новые токены
       const tokens = await this.generateTokens(user.id, user.email);
 
-      // Сохраняем новый refresh token
       await this.refreshTokenRepository.create({
         token: tokens.refreshToken,
         userId: user.id,
@@ -246,7 +229,6 @@ export class AuthService {
     const now = new Date();
     const expirationDate = new Date(now);
 
-    // Парсим строку типа "7d", "30d", "90d"
     if (expirationTime.endsWith('d')) {
       const days = parseInt(expirationTime.replace('d', ''), 10);
       expirationDate.setDate(now.getDate() + days);
@@ -257,7 +239,6 @@ export class AuthService {
       const minutes = parseInt(expirationTime.replace('m', ''), 10);
       expirationDate.setMinutes(now.getMinutes() + minutes);
     } else {
-      // По умолчанию 7 дней
       expirationDate.setDate(now.getDate() + 7);
     }
 

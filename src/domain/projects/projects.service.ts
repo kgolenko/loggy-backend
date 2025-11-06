@@ -36,21 +36,18 @@ export class ProjectsService {
     id: string,
     updateProjectDto: UpdateProjectDto,
   ): Promise<Project> {
-    // Проверить существование и владение
     await this.findOne(userId, id);
 
     return await this.projectRepository.update({ id }, { ...updateProjectDto });
   }
 
   async remove(userId: string, id: string): Promise<void> {
-    // Проверить существование и владение
     await this.findOne(userId, id);
 
     await this.projectRepository.delete({ id });
   }
 
   async regenerateToken(userId: string, id: string): Promise<Project> {
-    // Проверить существование и владение
     await this.findOne(userId, id);
 
     return await this.projectRepository.regenerateToken(id);

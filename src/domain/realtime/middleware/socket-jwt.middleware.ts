@@ -8,7 +8,6 @@ type NextFunction = (err?: Error) => void;
 export class SocketJwtMiddleware {
   constructor(private jwtService: JwtService) {}
 
-  // Middleware функция для Socket.IO
   static create(jwtService: JwtService) {
     const middleware = new SocketJwtMiddleware(jwtService);
     return (socket: Socket, next: NextFunction) => {
@@ -36,11 +35,9 @@ export class SocketJwtMiddleware {
   }
 
   private extractToken(socket: Socket): string | null {
-    // Из query параметров
     const token = socket.handshake.query.token as string;
     if (token) return token;
 
-    // Из headers
     const authHeader = socket.handshake.headers.authorization;
     if (authHeader?.startsWith('Bearer ')) {
       return authHeader.substring(7);

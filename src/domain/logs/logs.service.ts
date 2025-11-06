@@ -15,14 +15,12 @@ export class LogsService {
   ) {}
 
   async create(createLogDto: CreateLogDto, projectToken: string): Promise<Log> {
-    // Найти проект по токену (уже проверен в guard)
     const project = await this.projectRepository.findByToken(projectToken);
 
     if (!project) {
       throw new NotFoundException('Проект не найден');
     }
 
-    // Парсим timestamp если предоставлен
     const timestamp = createLogDto.timestamp
       ? new Date(createLogDto.timestamp)
       : new Date();
@@ -36,7 +34,6 @@ export class LogsService {
       tags: createLogDto.tags || [],
     });
 
-    // Эмитим событие для realtime broadcast
     this.eventEmitter.emit('log.created', new LogCreatedEvent(log, project.id));
 
     return log;
@@ -54,7 +51,6 @@ export class LogsService {
       offset?: number;
     },
   ) {
-    // Проверить владение проектом
     const project = await this.projectRepository.findByUserIdAndId(
       userId,
       projectId,
@@ -77,7 +73,6 @@ export class LogsService {
       to?: Date;
     },
   ) {
-    // Проверить владение проектом
     const project = await this.projectRepository.findByUserIdAndId(
       userId,
       projectId,
@@ -91,7 +86,6 @@ export class LogsService {
   }
 
   async findOne(projectId: string, userId: string, logId: string) {
-    // Проверить владение проектом
     const project = await this.projectRepository.findByUserIdAndId(
       userId,
       projectId,

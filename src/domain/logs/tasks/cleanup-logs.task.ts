@@ -7,7 +7,7 @@ import { CONFIG__LOG_RETENTION_DAYS } from '@shared/constants';
 @Injectable()
 export class CleanupLogsTask {
   private readonly logger = new Logger(CleanupLogsTask.name);
-  private isRunning = false; // Флаг для предотвращения параллельного выполнения
+  private isRunning = false;
 
   constructor(
     private readonly logRepository: LogRepository,
@@ -20,7 +20,6 @@ export class CleanupLogsTask {
    */
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleCron() {
-    // Предотвратить параллельное выполнение
     if (this.isRunning) {
       this.logger.warn('Cleanup task is already running, skipping...');
       return;

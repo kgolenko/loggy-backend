@@ -20,7 +20,6 @@ export class LogRepository extends BaseRepository<Prisma.LogDelegate, Log> {
     let deletedInBatch = 0;
 
     do {
-      // Удаляем батч в транзакции
       deletedInBatch = await this.prisma.$transaction(async (tx) => {
         const logsToDelete = await tx.log.findMany({
           where: {

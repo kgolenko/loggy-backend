@@ -25,20 +25,17 @@ export class ProjectTokenGuard implements CanActivate {
       throw new NotFoundException('Проект с таким токеном не найден');
     }
 
-    // Добавляем проект в request для использования в контроллере
     request.project = project;
 
     return true;
   }
 
   private extractTokenFromHeader(request: any): string | undefined {
-    // Проверяем заголовок X-Project-Token
     const token = request.headers['x-project-token'];
     if (token) {
       return token;
     }
 
-    // Альтернативно: Authorization: Bearer <token> для проектов
     const authHeader = request.headers.authorization;
     if (authHeader?.startsWith('Bearer ')) {
       return authHeader.substring(7);
